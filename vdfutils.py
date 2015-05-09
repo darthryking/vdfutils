@@ -9,6 +9,8 @@ Utilities for processing Valve KeyValue data formats.
 
 """
 
+__version__ = '2.0.0'
+
 from collections import OrderedDict
 
 __all__ = (
