@@ -121,6 +121,10 @@ PARSE_VDF_TEST_CASES = (
         'test14.vdf',
         VDFConsistencyFailure('Mismatched brackets!'),
     ),
+    (
+        'test15.vdf',
+        VDFConsistencyFailure('Mismatched brackets!'),
+    ),
 )
 
 
