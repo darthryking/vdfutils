@@ -117,6 +117,10 @@ PARSE_VDF_TEST_CASES = (
             }
         },
     ),
+    (
+        'test14.vdf',
+        VDFConsistencyFailure('Mismatched brackets!'),
+    ),
 )
 
 
@@ -130,7 +134,7 @@ def test_parse_vdf():
         
         if (type(expected) is not dict and
                 issubclass(expected.__class__, Exception)):
-            
+                
             result = None
             try:
                 result = parse_vdf(data)

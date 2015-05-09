@@ -3,13 +3,13 @@
 vdfutils.py
 By DKY
 
-Version 2.0.0
+Version 2.0.1
 
 Utilities for processing Valve KeyValue data formats.
 
 """
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
 
 from collections import OrderedDict
 
@@ -277,6 +277,10 @@ def parse_vdf(inData):
                     
             else:
                 assert False
+                
+        else:   # Did not break from loop
+            if _depth > 0:
+                raise VDFConsistencyFailure("Mismatched brackets!")
                 
         if key is not None:
             raise VDFConsistencyFailure("Key without value!")
