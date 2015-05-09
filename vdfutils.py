@@ -61,55 +61,55 @@ class VDFConsistencyFailure(Exception):
         return "{}\nError is: {}".format(self.BAD_VDF_MSG, self.message)
         
         
-class Token(object):
+class _Token(object):
     """ An abstract base class for VDF tokens. """
     pass
     
     
-class Field(Token):
+class _Field(_Token):
     """ A Token that represents a data field (either a key or a value). """
     
     def __init__(self, data):
         self.data = data
         
     def __repr__(self):
-        return "Field('{}')".format(self.data)
+        return "_Field('{}')".format(self.data)
         
     def __eq__(self, other):
         return self.data == other.data
         
         
-class Brace(Token):
+class _Brace(_Token):
     """ A Token that represents an open or close curly brace. """
     
     def __init__(self, open):
         self.isOpen = open
         
     def __repr__(self):
-        return "Brace({})".format(self.isOpen)
+        return "_Brace({})".format(self.isOpen)
         
     def __eq__(self, other):
         return self.isOpen == other.isOpen
         
         
-class OpenBrace(Brace):
+class _OpenBrace(_Brace):
     """ A Token that represents an open curly brace. """
     
     def __init__(self):
-        super(OpenBrace, self).__init__(True)
+        super(_OpenBrace, self).__init__(True)
         
     def __repr__(self):
-        return "OpenBrace()"
+        return "_OpenBrace()"
         
         
-class CloseBrace(Brace):
+class _CloseBrace(_Brace):
     """ A Token that represents a close curly brace. """
     
     def __init__(self):
-        super(CloseBrace, self).__init__(False)
+        super(_CloseBrace, self).__init__(False)
         
     def __repr__(self):
-        return "CloseBrace()"
+        return "_CloseBrace()"
         
         
 def _tokenize_vdf(inData):
@@ -176,7 +176,7 @@ def _tokenize_vdf(inData):
                     if quoteStart == -1:
                         if fieldStart != -1:
                             data = escape(inData[fieldStart:i])
-                            yield Field(data)
+                            yield _Field(data)
                             
                             fieldStart = -1
                             
@@ -184,14 +184,14 @@ def _tokenize_vdf(inData):
                         
                     else:
                         data = escape(inData[quoteStart + 1:i])
-                        yield Field(data)
+                        yield _Field(data)
                         
                         quoteStart = -1
                         
             elif c in WHITESPACE:
                 if fieldStart != -1:
                     data = escape(inData[fieldStart:i])
-                    yield Field(data)
+                    yield _Field(data)
                     
                     fieldStart = -1
                     
@@ -199,21 +199,21 @@ def _tokenize_vdf(inData):
                 if quoteStart == -1:
                     if fieldStart != -1:
                         data = escape(inData[fieldStart:i])
-                        yield Field(data)
+                        yield _Field(data)
                         
                         fieldStart = -1
                         
-                    yield OpenBrace()
+                    yield _OpenBrace()
                     
             elif c == CLOSE_BRACE:
                 if quoteStart == -1:
                     if fieldStart != -1:
                         data = escape(inData[fieldStart:i])
-                        yield Field(data)
+                        yield _Field(data)
                         
                         fieldStart = -1
                         
-                    yield CloseBrace()
+                    yield _CloseBrace()
                     
             else:
                 if quoteStart == -1 and fieldStart == -1:
@@ -252,14 +252,14 @@ def parse_vdf(inData):
         key = None
         
         for token in tokens:
-            if isinstance(token, Field):
+            if isinstance(token, _Field):
                 if key is not None:
                     data[key] = token.data
                     key = None
                 else:
                     key = token.data
                     
-            elif isinstance(token, OpenBrace):
+            elif isinstance(token, _OpenBrace):
                 if key is not None:
                     # Recursion is fun!
                     data[key] = parse_tokens(tokens, _depth=_depth + 1)
@@ -267,7 +267,7 @@ def parse_vdf(inData):
                 else:
                     raise VDFConsistencyFailure("Brackets without heading!")
                     
-            elif isinstance(token, CloseBrace):
+            elif isinstance(token, _CloseBrace):
                 if _depth > 0:
                     break
                 else:
