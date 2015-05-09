@@ -299,8 +299,6 @@ def format_vdf(data, _depth=0):
     outData = []
     
     for key, item in data.iteritems():
-        key = key.replace(UNIQUEIFIER, '')
-        
         if isinstance(item, basestring):
             outData += (
                 INDENT,
