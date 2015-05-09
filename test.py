@@ -1,7 +1,7 @@
 import sys
 import os
 
-from vdfutils import parse_vdf, format_vdf, VDFConsistencyFailure, UNIQUEIFIER
+from vdfutils import parse_vdf, format_vdf, VDFConsistencyFailure
 
 PARSE_VDF_DIR = 'parse_vdf'
 PARSE_VDF_TEST_CASES = (
@@ -55,11 +55,11 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test5.vdf',
-        VDFConsistencyFailure("Brackets have no heading!"),
+        VDFConsistencyFailure("Brackets without heading!"),
     ),
     (
         'test6.vdf',
-        VDFConsistencyFailure("Mismatched brackets!"),
+        VDFConsistencyFailure("Brackets without heading!"),
     ),
     (
         'test7.vdf',
@@ -113,7 +113,7 @@ def test_parse_vdf():
             
             result = None
             try:
-                result = parse_vdf(data, ordered=False)
+                result = parse_vdf(data)
                 
             except expected.__class__ as e:
                 print "Result:\n", e
@@ -127,7 +127,7 @@ def test_parse_vdf():
             assert result is None
             
         else:
-            result = parse_vdf(data, ordered=False)
+            result = parse_vdf(data)
             
             print "Result:\n", result
             
@@ -141,7 +141,6 @@ def test_parse_vdf():
     
 if __name__ == '__main__':
     assert test_parse_vdf() == 0
-    
     print "All tests passed!"
     
     
