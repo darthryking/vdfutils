@@ -293,6 +293,14 @@ def format_vdf(data, _depth=0):
     
     """
     
+    def escape(s):
+        ''' Takes a string and returns a new string with all quote and 
+        backslash characters escaped.
+        
+        '''
+        
+        return s.replace(BACKSLASH, ESC_BACKSLASH).replace(QUOTE, ESC_QUOTE)
+        
     SINGLE_INDENT = ' ' * 4
     INDENT = SINGLE_INDENT * _depth
     
@@ -302,9 +310,9 @@ def format_vdf(data, _depth=0):
         if isinstance(item, basestring):
             outData += (
                 INDENT,
-                '"{}"'.format(key),
+                '"{}"'.format(escape(key)),
                 SINGLE_INDENT,
-                '"{}"'.format(item),
+                '"{}"'.format(escape(item)),
                 '\n',
             )
             
