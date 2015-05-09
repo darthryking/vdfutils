@@ -97,6 +97,26 @@ PARSE_VDF_TEST_CASES = (
             },
         },
     ),
+    (
+        'test13.vdf',
+        {
+            'this'  :   {
+                'is'    :   {
+                    'a' :   {
+                        'set'   :   {
+                            'of'    :   {
+                                'ultra' :   {
+                                    'nested'    :   {
+                                        'brackets'  :   {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+    ),
 )
 
 
