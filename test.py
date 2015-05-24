@@ -7,6 +7,7 @@ PARSE_VDF_DIR = 'parse_vdf'
 PARSE_VDF_TEST_CASES = (
     (
         'test1.vdf',
+        True,
         {
             'key1'  :   'value1',
             'key2'  :   'value2',
@@ -17,6 +18,7 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test2.vdf',
+        True,
         {
             'key1'  :   'value1',
             'key2'  :   'value2',
@@ -27,6 +29,7 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test3.vdf',
+        True,
         {
             'key1'  :   'value1',
             'key2'  :   'value2',
@@ -37,6 +40,7 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test4.vdf',
+        True,
         {
             'body'  :   {
                 'head'  :   'skull',
@@ -55,18 +59,22 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test5.vdf',
+        True,
         VDFConsistencyFailure("Brackets without heading!"),
     ),
     (
         'test6.vdf',
+        True,
         VDFConsistencyFailure("Brackets without heading!"),
     ),
     (
         'test7.vdf',
+        True,
         VDFConsistencyFailure("Mismatched brackets!"),
     ),
     (
         'test8.vdf',
+        True,
         {
             'This'  :   'is',
             'some'  :   'perfectly',
@@ -75,20 +83,24 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test9.vdf',
+        True,
         VDFConsistencyFailure("Key without value!"),
     ),
     (
         'test10.vdf',
+        True,
         {
             'foo'   :   'repeat',
         },
     ),
     (
         'test11.vdf',
+        True,
         {},
     ),
     (
         'test12.vdf',
+        True,
         {
             'visible'   :   'value',
             'can'       :   {
@@ -99,6 +111,7 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test13.vdf',
+        True,
         {
             'this'  :   {
                 'is'    :   {
@@ -119,17 +132,50 @@ PARSE_VDF_TEST_CASES = (
     ),
     (
         'test14.vdf',
+        True,
         VDFConsistencyFailure('Mismatched brackets!'),
     ),
     (
         'test15.vdf',
+        True,
         VDFConsistencyFailure('Mismatched brackets!'),
+    ),
+    (
+        'test16.vdf',
+        True,
+        {
+            'escaped'   :   {
+                'tab'           :   '\t',
+                'newline'       :   '\n',
+                'quote'         :   '\"',
+                'backslash'     :   '\\',
+                'everything'    :   '\t\n\"\\\\\"\n\t',
+            }
+        },
+    ),
+    (
+        'test16.vdf',
+        False,
+        VDFConsistencyFailure('Mismatched quotes!'),
+    ),
+    (
+        'test17.vdf',
+        False,
+        {
+            'unescaped'   :   {
+                'tab'           :   '\\t',
+                'newline'       :   '\\n',
+                'backslash'     :   '\\\\',
+                'everything'    :   '\\t\\n\\',
+                '\\\\\\\\\\'    :   '\\n\\t',
+            }
+        },
     ),
 )
 
 
 def test_parse_vdf():
-    for file, expected in PARSE_VDF_TEST_CASES:
+    for file, escape, expected in PARSE_VDF_TEST_CASES:
         with open(os.path.join(PARSE_VDF_DIR, file), 'r') as f:
             data = f.read()
             
@@ -141,7 +187,7 @@ def test_parse_vdf():
                 
             result = None
             try:
-                result = parse_vdf(data)
+                result = parse_vdf(data, escape=escape)
                 
             except expected.__class__ as e:
                 print "Result:\n", e
@@ -155,11 +201,11 @@ def test_parse_vdf():
             assert result is None
             
         else:
-            result = parse_vdf(data)
+            result = parse_vdf(data, escape=escape)
             
             print "Result:\n", result
             
-            assert parse_vdf(data) == expected
+            assert result == expected
             
             print "Passed!\n"
         

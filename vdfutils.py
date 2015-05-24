@@ -3,13 +3,13 @@
 vdfutils.py
 By DKY
 
-Version 2.0.1
+Version 2.1.0
 
 Utilities for processing Valve KeyValue data formats.
 
 """
 
-__version__ = '2.0.1'
+__version__ = '2.1.0'
 
 from collections import OrderedDict
 
@@ -114,19 +114,25 @@ class _CloseBrace(_Brace):
         return "_CloseBrace()"
         
         
-def _tokenize_vdf(inData):
+def _tokenize_vdf(inData, escape=True):
     """ Returns a generator that yields tokens representing the given VDF 
     data. If the generator encounters data that cannot be tokenized, raises
     VDFConsistencyFailure.
     
     """
     
+    shouldEscape = escape
+    
     def escape(s):
         ''' Replaces a string's escape sequences with their corresponding 
-        characters.
+        characters, if shouldEscape is True. If shouldEscape is False, returns 
+        the string unchanged.
         
         '''
         
+        if not shouldEscape:
+            return s
+            
         escapeDict = {
             ESC_BACKSLASH   :   BACKSLASH,
             ESC_NEWLINE     :   NEWLINE,
@@ -159,7 +165,7 @@ def _tokenize_vdf(inData):
     quoteStart = -1
     fieldStart = -1
     
-    lastChar = ''
+    shouldEscapeQuote = False
     
     commented = False
     
@@ -174,7 +180,7 @@ def _tokenize_vdf(inData):
                     commented = True
                     
             elif c == QUOTE:
-                if lastChar != BACKSLASH:
+                if not shouldEscapeQuote:
                     if quoteStart == -1:
                         if fieldStart != -1:
                             data = escape(inData[fieldStart:i])
@@ -221,6 +227,13 @@ def _tokenize_vdf(inData):
                 if quoteStart == -1 and fieldStart == -1:
                     fieldStart = i
                     
+            # Special case for dealing with escaped quotes.
+            if shouldEscape:
+                if c == BACKSLASH:
+                    shouldEscapeQuote = not shouldEscapeQuote
+                else:
+                    shouldEscapeQuote = False
+                    
         else:   # Commented
             if c == NEWLINE:
                 commented = False
@@ -233,7 +246,7 @@ def _tokenize_vdf(inData):
         raise VDFConsistencyFailure("Mismatched quotes!")
         
         
-def parse_vdf(inData):
+def parse_vdf(inData, escape=True):
     """ Parses a string in VDF format and returns an OrderedDict representing 
     the data.
     
@@ -287,24 +300,36 @@ def parse_vdf(inData):
             
         return data
         
-    tokens = _tokenize_vdf(inData)
+    tokens = _tokenize_vdf(inData, escape)
     return parse_tokens(tokens)
     
     
-def format_vdf(data, _depth=0):
+def format_vdf(data, escape=True, _depth=0):
     """ Takes dictionary data and returns a string representing that data in 
     VDF format.
     
     """
     
+    shouldEscape = escape
+    
     def escape(s):
-        ''' Takes a string and returns a new string with all quote and 
-        backslash characters escaped.
+        ''' Takes a string and returns a new string with all escapable 
+        characters escaped, if shouldEscape is True. If shouldEscape is False,
+        returns the string unchanged.
         
         '''
         
-        return s.replace(BACKSLASH, ESC_BACKSLASH).replace(QUOTE, ESC_QUOTE)
-        
+        if shouldEscape:
+            return (
+                s
+                    .replace(BACKSLASH, ESC_BACKSLASH)
+                    .replace(NEWLINE, ESC_NEWLINE)
+                    .replace(TAB, ESC_TAB)
+                    .replace(QUOTE, ESC_QUOTE)
+            )
+        else:
+            return s
+            
     SINGLE_INDENT = ' ' * 4
     INDENT = SINGLE_INDENT * _depth
     
