@@ -246,7 +246,7 @@ def _tokenize_vdf(inData, escape=True):
         raise VDFConsistencyFailure("Mismatched quotes!")
         
         
-def parse_vdf(inData, escape=True):
+def parse_vdf(inData, allowRepeats=False, escape=True):
     """ Parses a string in VDF format and returns an OrderedDict representing 
     the data.
     
@@ -269,8 +269,19 @@ def parse_vdf(inData, escape=True):
         for token in tokens:
             if isinstance(token, _Field):
                 if key is not None:
-                    data[key] = token.data
+                    if allowRepeats:
+                        try:
+                            data[key].append(token.data)
+                        except KeyError:
+                            data[key] = token.data
+                        except AttributeError:
+                            elem = data[key]
+                            data[key] = [elem, token.data]
+                    else:
+                        data[key] = token.data
+                        
                     key = None
+                    
                 else:
                     key = token.data
                     
