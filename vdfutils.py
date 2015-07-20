@@ -288,8 +288,21 @@ def parse_vdf(inData, allowRepeats=False, escape=True):
             elif isinstance(token, _OpenBrace):
                 if key is not None:
                     # Recursion is fun!
-                    data[key] = parse_tokens(tokens, _depth=_depth + 1)
+                    innerResult = parse_tokens(tokens, _depth=_depth + 1)
+                    
+                    if allowRepeats:
+                        try:
+                            data[key].append(innerResult)
+                        except KeyError:
+                            data[key] = innerResult
+                        except AttributeError:
+                            elem = data[key]
+                            data[key] = [elem, innerResult]
+                    else:
+                        data[key] = innerResult
+                        
                     key = None
+                    
                 else:
                     raise VDFConsistencyFailure("Brackets without heading!")
                     

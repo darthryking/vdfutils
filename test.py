@@ -197,6 +197,58 @@ PARSE_VDF_TEST_CASES = (
             }
         },
     ),
+    (
+        'test18.vdf',
+        True,
+        False,
+        {
+            'foo'   :   ['these', 'keys', 'repeat'],
+            'bar'   :   [
+                {'this' :   'repeats'},
+                {
+                    'this'  :   'repeats',
+                    'yet'   :   'again',
+                },
+                {'and'  :   'again'},
+            ],
+            'spam'  :   [
+                {
+                    'id'        :   '0',
+                    'nested'    :   [
+                        {
+                            'id'    :   '0',
+                            'repeating' :   'keys',
+                        },
+                        {
+                            'id'    :   '1',
+                            'repeating' :   'keys',
+                        },
+                        {
+                            'id'    :   '2',
+                            'repeating' :   'keys',
+                        },
+                    ],
+                },
+                {
+                    'id'        :   '1',
+                    'nested'    :   [
+                        {
+                            'id'    :   '0',
+                            'repeating' :   'keys',
+                        },
+                        {
+                            'id'    :   '1',
+                            'repeating' :   'keys',
+                        },
+                        {
+                            'id'    :   '2',
+                            'repeating' :   'keys',
+                        },
+                    ],
+                },
+            ],
+        },
+    ),
 )
 
 
