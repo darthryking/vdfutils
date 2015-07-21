@@ -414,7 +414,7 @@ def format_vdf(data, escape=True, _depth=0):
         try:
             outData += format_item(key, value)
             
-        # Value is neither a string nor a dict
+        # Value is neither a string nor a dict.
         except VDFSerializationError as e:
             
             # Attempt to treat the value as an iterable.
