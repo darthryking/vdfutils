@@ -347,6 +347,8 @@ def format_vdf(data, escape=True, _depth=0):
     """ Takes dictionary data and returns a string representing that data in 
     VDF format.
     
+    If this cannot be done, raises VDFSerializationError.
+    
     """
     
     shouldEscape = escape
@@ -373,6 +375,9 @@ def format_vdf(data, escape=True, _depth=0):
         ''' Returns a tuple of VDF serialization elements built using the 
         given key and value.
         
+        If the value is neither a string nor a dict, raises 
+        VDFSerializationError.
+        
         '''
         
         # The usual case.
@@ -390,7 +395,7 @@ def format_vdf(data, escape=True, _depth=0):
             return (
                 INDENT, '"{}"'.format(key),
                 '\n', INDENT, '{\n',
-                format_vdf(value, _depth=_depth + 1),    # Recursion is fun!
+                format_vdf(value, _depth=_depth + 1),   # Recursion is fun!
                 '\n', INDENT, '}\n',
             )
             
