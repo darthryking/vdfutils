@@ -14,6 +14,9 @@ __version__ = '2.2.1a DEV'
 from collections import OrderedDict
 
 __all__ = (
+    'VDFError',
+    'VDFConsistencyError',
+    'VDFSerializationError',
     'parse_vdf',
     'format_vdf',
     'NEWLINE',
@@ -51,18 +54,30 @@ SPACE = ' '
 WHITESPACE = ''.join((SPACE, NEWLINE, TAB))
 
 
-class VDFConsistencyFailure(Exception):
-    """ You have a bad VDF file. :( """
+class VDFError(Exception):
+    """ Abstract base Exception for errors that may occur in this module. """
     
-    BAD_VDF_MSG = "You have a bad VDF file. :("
+    VDF_ERROR_MSG = "VDF Error :("
     
     def __init__(self, message):
         self.message = message
         
     def __str__(self):
-        return "{}\nError is: {}".format(self.BAD_VDF_MSG, self.message)
+        return "{}\nError is: {}".format(self.VDF_ERROR_MSG, self.message)
         
         
+class VDFConsistencyError(VDFError):
+    """ You have a bad VDF file. :( """
+    
+    VDF_ERROR_MSG = "You have a bad VDF file. :("
+    
+    
+class VDFSerializationError(VDFError):
+    """ Could not serialize the given data to VDF format. """
+    
+    VDF_ERROR_MSG = "Unable to serialize the given data. :("
+    
+    
 class _Token(object):
     """ An abstract base class for VDF tokens. """
     pass
@@ -117,7 +132,7 @@ class _CloseBrace(_Brace):
 def _tokenize_vdf(inData, escape=True):
     """ Returns a generator that yields tokens representing the given VDF 
     data. If the generator encounters data that cannot be tokenized, raises
-    VDFConsistencyFailure.
+    VDFConsistencyError.
     
     """
     
@@ -243,14 +258,14 @@ def _tokenize_vdf(inData, escape=True):
         i += 1
         
     if quoteStart != -1:
-        raise VDFConsistencyFailure("Mismatched quotes!")
+        raise VDFConsistencyError("Mismatched quotes!")
         
         
 def parse_vdf(inData, allowRepeats=False, escape=True):
     """ Parses a string in VDF format and returns an OrderedDict representing 
     the data.
     
-    If this is not possible, raises VDFConsistencyFailure.
+    If this is not possible, raises VDFConsistencyError.
     
     """
     
@@ -258,7 +273,7 @@ def parse_vdf(inData, allowRepeats=False, escape=True):
         ''' Takes a stream of VDF tokens and uses them to build an ordered 
         dictionary representing the VDF data.
         
-        If this is not possible, raises VDFConsistencyFailure.
+        If this is not possible, raises VDFConsistencyError.
         
         '''
         
@@ -304,23 +319,23 @@ def parse_vdf(inData, allowRepeats=False, escape=True):
                     key = None
                     
                 else:
-                    raise VDFConsistencyFailure("Brackets without heading!")
+                    raise VDFConsistencyError("Brackets without heading!")
                     
             elif isinstance(token, _CloseBrace):
                 if _depth > 0:
                     break
                 else:
-                    raise VDFConsistencyFailure("Mismatched brackets!")
+                    raise VDFConsistencyError("Mismatched brackets!")
                     
             else:
                 assert False
                 
         else:   # Did not break from loop
             if _depth > 0:
-                raise VDFConsistencyFailure("Mismatched brackets!")
+                raise VDFConsistencyError("Mismatched brackets!")
                 
         if key is not None:
-            raise VDFConsistencyFailure("Key without value!")
+            raise VDFConsistencyError("Key '{}' without value!".format(key))
             
         return data
         
@@ -354,29 +369,65 @@ def format_vdf(data, escape=True, _depth=0):
         else:
             return s
             
+    def format_item(key, value):
+        ''' Returns a tuple of VDF serialization elements built using the 
+        given key and value.
+        
+        '''
+        
+        # The usual case.
+        if isinstance(value, basestring):
+            return (
+                INDENT,
+                '"{}"'.format(escape(key)),
+                SINGLE_INDENT,
+                '"{}"'.format(escape(value)),
+                '\n',
+            )
+            
+        # The nested case.
+        elif isinstance(value, dict):
+            return (
+                INDENT, '"{}"'.format(key),
+                '\n', INDENT, '{\n',
+                format_vdf(value, _depth=_depth + 1),    # Recursion is fun!
+                '\n', INDENT, '}\n',
+            )
+            
+        # None of the above.
+        else:
+            raise VDFSerializationError(
+                    "Invalid non-string, non-dict value: {}".format(value)
+                )
+                
     SINGLE_INDENT = ' ' * 4
     INDENT = SINGLE_INDENT * _depth
     
     outData = []
     
-    for key, item in data.iteritems():
-        if isinstance(item, basestring):
-            outData += (
-                INDENT,
-                '"{}"'.format(escape(key)),
-                SINGLE_INDENT,
-                '"{}"'.format(escape(item)),
-                '\n',
-            )
+    for key, value in data.iteritems():
+        try:
+            outData += format_item(key, value)
             
-        else:
-            outData += (
-                INDENT, '"{}"'.format(key),
-                '\n', INDENT, '{\n',
-                format_vdf(item, _depth=_depth + 1),    # Recursion is fun!
-                '\n', INDENT, '}\n',
-            )
+        # Value is neither a string nor a dict
+        except VDFSerializationError as e:
             
+            # Attempt to treat the value as an iterable.
+            try:
+                iterable = iter(value)
+                
+            # If it is not an iterable, complain and blow up.
+            except TypeError:
+                raise VDFSerializationError(
+                        "Invalid non-string, non-dict, non-iterable value: "
+                        "{}".format(value)
+                    )
+                    
+            # The value is indeed an iterable.
+            else:
+                for innerValue in iterable:
+                    outData += format_item(key, innerValue)
+                    
     return ''.join(outData)
     
     

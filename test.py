@@ -1,7 +1,7 @@
 import sys
 import os
 
-from vdfutils import parse_vdf, format_vdf, VDFConsistencyFailure
+from vdfutils import parse_vdf, format_vdf, VDFConsistencyError
 
 PARSE_VDF_DIR = 'parse_vdf'
 PARSE_VDF_TEST_CASES = (
@@ -65,19 +65,19 @@ PARSE_VDF_TEST_CASES = (
         'test5.vdf',
         False,
         True,
-        VDFConsistencyFailure("Brackets without heading!"),
+        VDFConsistencyError("Brackets without heading!"),
     ),
     (
         'test6.vdf',
         False,
         True,
-        VDFConsistencyFailure("Brackets without heading!"),
+        VDFConsistencyError("Brackets without heading!"),
     ),
     (
         'test7.vdf',
         False,
         True,
-        VDFConsistencyFailure("Mismatched brackets!"),
+        VDFConsistencyError("Mismatched brackets!"),
     ),
     (
         'test8.vdf',
@@ -93,7 +93,7 @@ PARSE_VDF_TEST_CASES = (
         'test9.vdf',
         False,
         True,
-        VDFConsistencyFailure("Key without value!"),
+        VDFConsistencyError("Key 'valid.' without value!"),
     ),
     (
         'test10.vdf',
@@ -155,13 +155,13 @@ PARSE_VDF_TEST_CASES = (
         'test14.vdf',
         False,
         True,
-        VDFConsistencyFailure('Mismatched brackets!'),
+        VDFConsistencyError('Mismatched brackets!'),
     ),
     (
         'test15.vdf',
         False,
         True,
-        VDFConsistencyFailure('Mismatched brackets!'),
+        VDFConsistencyError('Mismatched brackets!'),
     ),
     (
         'test16.vdf',
@@ -181,7 +181,7 @@ PARSE_VDF_TEST_CASES = (
         'test16.vdf',
         False,
         False,
-        VDFConsistencyFailure('Mismatched quotes!'),
+        VDFConsistencyError('Mismatched quotes!'),
     ),
     (
         'test17.vdf',
@@ -260,9 +260,7 @@ def test_parse_vdf():
         print "Testing {}...".format(file)
         print "Expected:\n", expected
         
-        if (type(expected) is not dict and
-                issubclass(expected.__class__, Exception)):
-                
+        if isinstance(expected, Exception):
             result = None
             try:
                 result = parse_vdf(data, allowRepeats=repeat, escape=escape)
@@ -286,7 +284,7 @@ def test_parse_vdf():
             assert result == expected
             
             print "Passed!\n"
-        
+            
     print "All parse_vdf() tests passed!"
     return 0
     
