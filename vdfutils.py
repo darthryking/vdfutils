@@ -3,13 +3,13 @@
 vdfutils.py
 By DKY
 
-Version 2.2.1
+Version 2.2.1a DEV
 
 Utilities for processing Valve KeyValue data formats.
 
 """
 
-__version__ = '2.2.1'
+__version__ = '2.2.1a DEV'
 
 from collections import OrderedDict
 
