@@ -419,7 +419,7 @@ def format_vdf(data, escape=True, _depth=0):
             
             # Attempt to treat the value as an iterable.
             try:
-                iterable = iter(value)
+                valueIterator = iter(value)
                 
             # If it is not an iterable, complain and blow up.
             except TypeError:
@@ -430,7 +430,7 @@ def format_vdf(data, escape=True, _depth=0):
                     
             # The value is indeed an iterable.
             else:
-                for innerValue in iterable:
+                for innerValue in valueIterator:
                     outData += format_item(key, innerValue)
                     
     return ''.join(outData)
