@@ -1,5 +1,6 @@
-import sys
 import os
+import sys
+from collections import OrderedDict
 
 from vdfutils import parse_vdf, format_vdf, VDFConsistencyError
 
@@ -251,6 +252,58 @@ PARSE_VDF_TEST_CASES = (
     ),
 )
 
+FORMAT_VDF_DIR = 'format_vdf'
+FORMAT_VDF_TEST_CASES = (
+    (
+        OrderedDict(
+                (
+                    ('key1', 'value1'),
+                    ('key2', 'value2'),
+                    ('key3', 'value3'),
+                    ('key4', 'value4'),
+                    ('key5', 'value5'),
+                ),
+            ),                      # Data
+        False,                      # Escape
+        'test1.vdf',                # Expected (file)
+    ),
+    (
+        {
+            'body' : OrderedDict((
+                ('head', 'skull'),
+                ('torso',
+                    OrderedDict((
+                        ('upper',
+                            OrderedDict((
+                                ('arm1', 'left'),
+                                ('arm2', 'right')))),
+                        ('lower',
+                            OrderedDict((
+                                ('leg1', 'left'),
+                                ('leg2', 'right'))))))))),
+        },
+        False,
+        'test2.vdf',
+    ),
+    (
+        {'foo' : ['these', 'keys', 'repeat']},
+        False,
+        'test3.vdf',
+    ),
+    (
+        OrderedDict(
+                (
+                    ('here', 123),
+                    ('are', 456),
+                    ('some', 789),
+                    ('numbers', 0),
+                ),
+            ),
+        False,
+        'test4.vdf',
+    ),
+)
+
 
 def test_parse_vdf():
     for file, repeat, escape, expected in PARSE_VDF_TEST_CASES:
@@ -289,8 +342,32 @@ def test_parse_vdf():
     return 0
     
     
+def test_format_vdf():
+    for i, (data, escape, file) in enumerate(FORMAT_VDF_TEST_CASES):
+        print "Test {}...".format(i)
+        
+        with open(os.path.join(FORMAT_VDF_DIR, file), 'r') as f:
+            expected = f.read()
+            
+        print "Expected:\n", expected
+        
+        result = format_vdf(data, escape=escape)
+        
+        print "Result:\n", result
+        
+        assert result.strip() == expected.strip()
+        
+        print "Passed!\n"
+        
+    print "All format_vdf() tests passed!"
+    return 0
+    
+    
 if __name__ == '__main__':
     assert test_parse_vdf() == 0
+    print ""
+    
+    assert test_format_vdf() == 0
     print "All tests passed!"
     
     

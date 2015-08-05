@@ -401,33 +401,30 @@ def format_vdf(data, escape=True, _depth=0):
             
         # None of the above.
         else:
-            raise VDFSerializationError(
-                    "Invalid non-string, non-dict value: {}".format(value)
-                )
-                
+            raise TypeError
+            
     SINGLE_INDENT = ' ' * 4
     INDENT = SINGLE_INDENT * _depth
     
     outData = []
     
     for key, value in data.iteritems():
+        key = str(key)
+        
         try:
             outData += format_item(key, value)
             
         # Value is neither a string nor a dict.
-        except VDFSerializationError:
+        except TypeError:
             
             # Attempt to treat the value as an iterable.
             try:
                 valueIterator = iter(value)
                 
-            # If it is not an iterable, complain and blow up.
+            # If it is not an iterable, convert it to a string and try again.
             except TypeError:
-                raise VDFSerializationError(
-                        "Invalid non-string, non-dict, non-iterable value: "
-                        "{}".format(value)
-                    )
-                    
+                outData += format_item(key, str(value))
+                
             # The value is indeed an iterable.
             else:
                 for innerValue in valueIterator:
