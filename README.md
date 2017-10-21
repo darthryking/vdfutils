@@ -7,15 +7,15 @@ __VDFUtils__ is a Python utility library that provides the ability to parse and 
 
 Current version: ___3.0.1___
 
-###Requirements
+### Requirements
 * Python 2.7
 
-###Usage
+### Usage
 The two main functions that are provided by _VDFUtils_ are `parse_vdf()` and `format_vdf()`. `parse_vdf()` is used to convert a VDF-formatted string into a Python `OrderedDict`, and `format_vdf()` is used to convert a Python `dict` into a VDF-formatted string.
 
 _____
 
-#####`parse_vdf(inData, allowRepeats=False, escape=True)`
+##### `parse_vdf(inData, allowRepeats=False, escape=True)`
 
 ###### Parameters
 - `inData` - A VDF-formatted string.
@@ -30,7 +30,7 @@ _____
 
 _____
 
-#####`format_vdf(data, escape=True)`
+##### `format_vdf(data, escape=True)`
 Takes dictonary data and returns a string representing that data in VDF format. If this cannot be done, raises `VDFSerializationError`.
 
 ###### Parameters
