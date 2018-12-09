@@ -310,8 +310,8 @@ def test_parse_vdf():
         with open(os.path.join(PARSE_VDF_DIR, file), 'r') as f:
             data = f.read()
             
-        print "Testing {}...".format(file)
-        print "Expected:\n", expected
+        print("Testing {}...".format(file))
+        print("Expected:\n", expected)
         
         if isinstance(expected, Exception):
             result = None
@@ -319,55 +319,55 @@ def test_parse_vdf():
                 result = parse_vdf(data, allowRepeats=repeat, escape=escape)
                 
             except expected.__class__ as e:
-                print "Result:\n", e
+                print("Result:\n", e)
                 
                 assert str(e) == str(expected)
                 
-                print "Passed!\n"
+                print("Passed!\n")
                 continue
                 
-            print "Result:\n", result
+            print("Result:\n", result)
             assert result is None
             
         else:
             result = parse_vdf(data, allowRepeats=repeat, escape=escape)
             
-            print "Result:\n", result
+            print("Result:\n", result)
             
             assert result == expected
             
-            print "Passed!\n"
+            print("Passed!\n")
             
-    print "All parse_vdf() tests passed!"
+    print("All parse_vdf() tests passed!")
     return 0
     
     
 def test_format_vdf():
     for i, (data, escape, file) in enumerate(FORMAT_VDF_TEST_CASES):
-        print "Test {}...".format(i)
+        print("Test {}...".format(i))
         
         with open(os.path.join(FORMAT_VDF_DIR, file), 'r') as f:
             expected = f.read()
             
-        print "Expected:\n", expected
+        print("Expected:\n", expected)
         
         result = format_vdf(data, escape=escape)
         
-        print "Result:\n", result
+        print("Result:\n", result)
         
         assert result.strip() == expected.strip()
         
-        print "Passed!\n"
+        print("Passed!\n")
         
-    print "All format_vdf() tests passed!"
+    print("All format_vdf() tests passed!")
     return 0
     
     
 if __name__ == '__main__':
     assert test_parse_vdf() == 0
-    print ""
+    print("")
     
     assert test_format_vdf() == 0
-    print "All tests passed!"
+    print("All tests passed!")
     
     
